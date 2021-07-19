@@ -1,0 +1,6 @@
+datafiles/tengigtest.csv
+datafiles/inputdata
+tools/connectEC2.sh
+*pycache*
+logfile.txt
+Specs.pdf
