@@ -1,6 +1,8 @@
 datafiles/tengigtest.csv
 datafiles/inputdata
+datafiles/*Log*
+datafiles/*Search*
+datafiles/tengigtest.sql
 tools/connectEC2.sh
 *pycache*
 logfile.txt
-Specs.pdf

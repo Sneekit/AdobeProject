@@ -1,32 +1,44 @@
-class StringFunctions:
+import os
+from boto3 import client as botoclient, resource as botoresource
+
+class S3Client(object):
 	"""
-		A class that contains functions for handling strings
+		A class that contains information relevant to the S3 client
 	"""
 
-	def find_between(input, startstring, endstring):
+	def __init__(self, path = ""):
+		self.Bucket = ""
+		self.Path = ""
+		self.BaseName = ""
+		self.Client = botoclient("s3")
+		self.Resource = botoresource("s3")
+		self.Key = ""
+		self.Path = path
+
+		if len(self.Path):
+			self.parse_path(self.Path)
+
+	def parse_path(self, path):
 		"""
-			Returns the first occurance of a substring between two substrings within a given string
+			Parses out relevant information from a full S3 Path
 
 			Parameters
 			----------
-			input : (string)
-				The string to search within
-			startstring : (string)
-				The substring that acts as the header to the desired return value
-			endstring : (string)
-				The substring that acts as the footer to the desired return value
-			
-			Returns
-			----------
-			string : (string)
-				The substring between the given strings if it was found. Empty string otherwise.
+			path (string)
+				The full s3 path to parse
 		"""
-		try:
-			start = input.index(startstring) + len(startstring)
-			end = input.index(endstring, start)
-			return input[start:end]
-		except ValueError:
-			return ""
+
+		self.Path = path
+
+		pos = self.Path.index("/")
+		if pos > 0:
+			self.Bucket = self.Path[:pos]
+			self.Key = self.Path[pos+1:]
+			self.BaseName = os.path.basename(self.Key)
+
+		pos = self.Key.rindex("/")
+		if pos > 0:
+			self.Path = self.Key[:pos]
 
 class UrlParser(object):
 	"""
@@ -90,7 +102,9 @@ class UrlParser(object):
 				self.TopDomain = domains[-1]
 				domains.pop()
 			if len(domains):
-				self.Domain = domains[-1]
+				domain = domains[-1].capitalize()
+				# logic for 'Other' domains
+				self.Domain = domain if domain in ["Google", "Bing", "Yahoo"] else "Other"
 				domains.pop()
 			if len(domains):
 				self.SubDomain = domains[-1]
@@ -101,9 +115,9 @@ class UrlParser(object):
 		# parse the parameters
 		pos = url.index("?")
 		if pos >= 0:
-			parameters = url[pos+1:].split('&')
+			parameters = url[pos+1:].split("&")
 			for param in parameters:
-				values = param.split('=')
+				values = param.split("=")
 				if len(values) > 1:
 					self.Parameters[values[0]] = values[1]
 
@@ -122,13 +136,13 @@ class UrlParser(object):
 		if not len(self.Parameters):
 			return ""
 		elif 'q' in self.Parameters:
-			return self.Parameters['q'].replace('+', " ").replace('%20', " ").title()
+			return self.Parameters['q'].replace("+", " ").replace("%20", " ").title()
 		elif 'p' in self.Parameters:
-			return self.Parameters['p'].replace('+', " ").replace('%20', " ").title()
+			return self.Parameters['p'].replace("+", " ").replace("%20", " ").title()
 		elif 'text' in self.Parameters:
-			return self.Parameters['text'].replace('+', " ").replace('%20', " ").title()
+			return self.Parameters['text'].replace("+", " ").replace("%20", " ").title()
 		elif 'wd' in self.Parameters:
-			return self.Parameters['wd'].replace('+', " ").replace('%20', " ").title()
+			return self.Parameters['wd'].replace("+", " ").replace("%20", " ").title()
 		else:
 			return "Unknown"
 
@@ -136,6 +150,7 @@ class LogLevel():
 	"""
 		A class that contains an Enum of Log Levels
 	"""
+	
 	NONE = 0
 	ERROR = 1
 	INFO = 2
@@ -177,6 +192,7 @@ class Logger(object):
 
 		self.check_file()
 		self.LogFile.write(f"[{messagestr}]\t{message}\n")
+		self.LogFile.flush()
 	
 	def check_file(self):
 		"""
@@ -184,4 +200,11 @@ class Logger(object):
 		"""
 
 		if self.LogFile is None:
-			self.LogFile = open(self.FileName, 'w')
+			self.LogFile = open(self.FileName, "w", buffering = 16 * 1024 * 1024 )
+
+	def flush(self):
+		"""
+			Flush the current file so the write stream writes to the file.
+		"""
+
+		self.LogFile.flush()

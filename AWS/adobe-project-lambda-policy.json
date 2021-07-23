@@ -3,8 +3,22 @@
     "Statement": [
         {
             "Effect": "Allow",
+            "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:us-east-2:539923784684:*"
+            "Resource": "arn:aws:logs:us-east-2:************:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "lambda:InvokeFunction",
+            "Resource": "arn:aws:lambda:us-east-2:************:function:adobe*"
         },
         {
             "Effect": "Allow",
@@ -12,18 +26,7 @@
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": [
-                "arn:aws:logs:us-east-2:539923784684:log-group:/aws/lambda/adobe-s3-get-function:*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:CreateNetworkInterface",
-                "ec2:DescribeNetworkInterfaces",
-                "ec2:DeleteNetworkInterface"
-            ],
-            "Resource": "*"
+            "Resource": "arn:aws:logs:us-east-2:************:log-group:/aws/lambda/adobe-s3-get-function:*"
         }
     ]
 }
