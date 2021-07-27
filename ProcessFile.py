@@ -130,7 +130,7 @@ def parse_input_file(filestream, outputfile):
 			LOG.write(LogLevel.ERROR, f"Line: {linenumber}\t unhandled exception processing line: {ex}")
 
 	# write the grouped results out to a csv file for sorting
-	with open(outputfile, 'w', buffering = 16 * 1024 * 1024) as outfile:
+	with open(outputfile, "w", buffering = 16 * 1024 * 1024) as outfile:
 		for domain, revenue in resultsdict.items():
 			# parse keywords from domain
 			domaininfo = domain.split("|")
@@ -178,8 +178,13 @@ def process_s3_files():
 	S3.Client.upload_file(LOGFILE, S3.Bucket, f"outbound/{os.path.basename(LOGFILE)}")
 	S3.Client.upload_file(RESULTFILE, S3.Bucket, f"outbound/{os.path.basename(RESULTFILE)}")
 
-	# move processed file from inbound to processed directory
-	os.system(f"aws s3 mv s3://{S3.Bucket}/inbound/{S3.BaseName} s3://{S3.Bucket}/processed/{S3.BaseName}")
+	# copy processed file from inbound to processed directory
+	copysource = {
+		'Bucket': S3.Bucket,
+		'Key' : S3.Key
+	}
+	S3.Resource.meta.client.copy(copysource, S3.Bucket, f"processed/{DATESTAMP}_{S3.BaseName}")
+	S3.Resource.Object(S3.Bucket, S3.Key).delete()
 
 def display_processtime(starttime, process):
 	"""
