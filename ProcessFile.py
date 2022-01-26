@@ -5,6 +5,9 @@ import time
 import math
 from datetime import date
 
+# Hey Sariah
+
+
 # constants for the program to use
 LOCALTEST = False
 DATESTAMP = date.today().strftime(("%Y-%m-%d"))
